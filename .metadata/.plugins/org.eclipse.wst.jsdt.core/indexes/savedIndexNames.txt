@@ -1,0 +1,11 @@
+INDEX VERSION 1.4+C:\Users\abren\OneDrive\Documentos\despesas\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+449506480.index
+2466358178.index
+311345225.index
+1585425676.index
+1585425676.index
+1635847167.index
+714003277.index
+3234963143.index
+750686018.index
+784911149.index

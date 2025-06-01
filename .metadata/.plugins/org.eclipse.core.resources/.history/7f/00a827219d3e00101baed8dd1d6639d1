@@ -1,0 +1,123 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<% if (session.getAttribute("usuarioLogado") == null) {
+    response.sendRedirect("login.jsp");
+} %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações do Usuário</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 30px;
+            width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+
+        .success-message {
+            color: green;
+            margin-top: 10px;
+        }
+
+        .back-link {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-container">
+        <h2>Configurações do Usuário</h2>
+
+        <c:if test="${not empty erro}">
+            <p class="error-message">${erro}</p>
+        </c:if>
+        <c:if test="${not empty mensagem}">
+            <p class="success-message">${mensagem}</p>
+        </c:if>
+
+        <form action="<%= request.getContextPath() %>/configuracoes-usuario" method="post">
+            <div class="form-group">
+                <label for="renda_mensal">Renda Mensal:</label>
+                <input type="text" id="renda_mensal" name="renda_mensal" value="${rendaMensal}">
+            </div>
+            <button type="submit">Salvar Configurações</button>
+        </form>
+
+        <div class="back-link">
+            <a href="<%= request.getContextPath() %>/home">Voltar para a Home</a>
+        </div>
+    </div>
+</body>
+</html>

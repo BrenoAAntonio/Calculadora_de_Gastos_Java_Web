@@ -1,0 +1,10 @@
+INDEX VERSION 1.134+C:\Users\abren\OneDrive\Documentos\despesas\.metadata\.plugins\org.eclipse.jdt.core
+3722249501.index
+311345225.index
+3263673507.index
+1982583003.index
+422876707.index
+1865797976.index
+1620128763.index
+4015013496.index
+2708418370.index

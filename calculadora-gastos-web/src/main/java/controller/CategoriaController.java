@@ -1,0 +1,118 @@
+package controller;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import dao.CategoriaDAO;
+import dao.DespesaDAO;
+import dao.LogDAO;
+import modelo.Categoria;
+import modelo.Log;
+import modelo.Usuario;
+
+@WebServlet("/categoria")
+public class CategoriaController extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private CategoriaDAO categoriaDAO;
+    private DespesaDAO despesaDAO = new DespesaDAO();
+    private LogDAO logDAO = new LogDAO();
+
+    @Override
+    public void init() throws ServletException {
+        categoriaDAO = new CategoriaDAO();
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+
+        if ("cadastrar".equals(action)) {
+            cadastrarCategoria(request, response);
+        }
+    }
+
+    private void cadastrarCategoria(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String nome = request.getParameter("nome");
+        String descricao = request.getParameter("descricao");
+
+        Categoria categoria = new Categoria();
+        categoria.setNome(nome);
+        categoria.setDescricao(descricao);
+
+        try {
+            categoriaDAO.cadastrar(categoria);
+            HttpSession session = request.getSession();
+            Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
+            if (usuarioLogado != null) {
+                Log log = new Log();
+                log.setUsuario(usuarioLogado);
+                log.setAcao("Cadastro de Categoria");
+                log.setDetalhes("Categoria '" + nome + "' cadastrada.");
+                logDAO.registrar(log);
+            }
+            response.sendRedirect(request.getContextPath() + "/categoria?action=listar&cadastroSucesso=true");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("erro", "Erro ao cadastrar categoria.");
+            request.getRequestDispatcher("Categoria/CategoriaForm.jsp").forward(request, response);
+        }
+    }
+
+    public void excluirCategoria(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        try {
+            if (despesaDAO.existeDespesaComCategoria(id)) {
+                request.setAttribute("erroExclusao", "Não é possível excluir esta categoria, pois existem despesas associadas a ela.");
+            } else {
+                Categoria categoriaExcluida = categoriaDAO.buscarPorId(id);
+                categoriaDAO.excluir(id);
+                HttpSession session = request.getSession();
+                Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
+                if (usuarioLogado != null && categoriaExcluida != null) {
+                    Log log = new Log();
+                    log.setUsuario(usuarioLogado);
+                    log.setAcao("Exclusão de Categoria");
+                    log.setDetalhes("Categoria ID " + id + " ('" + categoriaExcluida.getNome() + "') excluída.");
+                    logDAO.registrar(log);
+                }
+                response.sendRedirect(request.getContextPath() + "/categoria?action=listar&exclusaoSucesso=true");
+                return;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("erro", "Erro ao excluir categoria.");
+        }
+        listarCategorias(request, response);
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+
+        if ("listar".equals(action)) {
+            listarCategorias(request, response);
+        } else if ("form".equals(action)) {
+            request.getRequestDispatcher("Categoria/CategoriaForm.jsp").forward(request, response);
+        } else if ("excluir".equals(action)) {
+            excluirCategoria(request, response);
+        }
+    }
+
+    private void listarCategorias(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            List<Categoria> categorias = categoriaDAO.listarTodos();
+            request.setAttribute("categorias", categorias);
+            request.getRequestDispatcher("Categoria/CategoriaList.jsp").forward(request, response);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("erro", "Erro ao listar categorias.");
+            request.getRequestDispatcher("Categoria/CategoriaList.jsp").forward(request, response);
+        }
+    }
+}

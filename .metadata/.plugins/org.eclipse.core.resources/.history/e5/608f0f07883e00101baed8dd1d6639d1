@@ -1,0 +1,124 @@
+package controller;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.util.List;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import dao.CategoriaDAO;
+import dao.DespesaDAO;
+import modelo.Categoria;
+import modelo.Despesa;
+import modelo.Usuario;
+
+@WebServlet("/despesas")
+public class DespesasController extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private DespesaDAO despesaDAO;
+    private CategoriaDAO categoriaDAO;
+
+    @Override
+    public void init() throws ServletException {
+        despesaDAO = new DespesaDAO();
+        categoriaDAO = new CategoriaDAO();
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+
+        if ("cadastrar".equals(action)) {
+            cadastrarDespesa(request, response);
+        }
+    }
+
+    private void cadastrarDespesa(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
+
+        if (usuarioLogado == null) {
+            response.sendRedirect("login.jsp"); // Usuário não logado
+            return;
+        }
+
+        try {
+            int categoriaId = Integer.parseInt(request.getParameter("categoriaId"));
+            String descricao = request.getParameter("descricao");
+            BigDecimal valor = new BigDecimal(request.getParameter("valor"));
+            Date dataDespesa = Date.valueOf(request.getParameter("dataDespesa"));
+
+            Categoria categoria = categoriaDAO.buscarPorId(categoriaId);
+            if (categoria == null) {
+                request.setAttribute("erro", "Categoria inválida.");
+                request.getRequestDispatcher("Despesas/DespesasForm.jsp").forward(request, response);
+                return;
+            }
+
+            Despesa despesa = new Despesa();
+            despesa.setUsuario(usuarioLogado);
+            despesa.setCategoria(categoria);
+            despesa.setDescricao(descricao);
+            despesa.setValor(valor);
+            despesa.setDataDespesa(dataDespesa);
+
+            despesaDAO.cadastrar(despesa);
+            response.sendRedirect("despesasList.jsp?cadastroSucesso=true");
+
+        } catch (IllegalArgumentException e) {
+            request.setAttribute("erro", "Dados inválidos para a despesa.");
+            request.getRequestDispatcher("DespesasForm.jsp").forward(request, response);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("erro", "Erro ao cadastrar despesa.");
+            request.getRequestDispatcher("DespesasForm.jsp").forward(request, response);
+        }
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+
+        if ("listar".equals(action)) {
+            listarDespesas(request, response);
+        } else if ("form".equals(action)) {
+            carregarCategoriasParaFormulario(request, response);
+            request.getRequestDispatcher("DespesasForm.jsp").forward(request, response);
+        }
+    }
+
+    private void listarDespesas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
+
+        if (usuarioLogado == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        try {
+            List<Despesa> despesas = despesaDAO.listarPorUsuario(usuarioLogado.getId());
+            request.setAttribute("despesas", despesas);
+            request.getRequestDispatcher("DespesasList.jsp").forward(request, response);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("erro", "Erro ao listar despesas.");
+            request.getRequestDispatcher("DespesasList.jsp").forward(request, response);
+        }
+    }
+
+    private void carregarCategoriasParaFormulario(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            List<Categoria> categorias = categoriaDAO.listarTodos();
+            request.setAttribute("categorias", categorias);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("erro", "Erro ao carregar categorias.");
+        }
+    }
+}

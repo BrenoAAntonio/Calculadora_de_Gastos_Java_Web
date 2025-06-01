@@ -1,0 +1,208 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<% if (session.getAttribute("usuarioLogado") == null) {
+    response.sendRedirect("login.jsp");
+} %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Gastos</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 30px;
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 900px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            width: 30%;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .recent-expenses {
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .recent-expenses h2 {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .sidebar h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .sidebar a {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: #0056b3;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .body-content {
+            display: flex;
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="body-content">
+        <div class="container main-content">
+            <div class="glass-container">
+                <h1>Bem-vindo(a), <% if (session.getAttribute("usuarioLogado") != null) { %>
+                    <%= ((modelo.Usuario) session.getAttribute("usuarioLogado")).getNome() %>!
+                <% } else { %>
+                    Visitante!
+                <% } %>
+                </h1>
+
+                <div class="dashboard-info">
+                    <div class="info-card">
+                        <h2>Gasto Mensal</h2>
+                        <p>R$ 0.00</p>
+                    </div>
+                    <div class="info-card">
+                        <h2>Balanço Atual</h2>
+                        <p>R$ 0.00</p>
+                    </div>
+                </div>
+
+                <div class="recent-expenses glass-container">
+                    <h2>Despesas Recentes</h2>
+                    <c:if test="${not empty despesasRecentes}">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Data</th>
+                                    <th>Categoria</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="despesa" items="${despesasRecentes}" varStatus="loop">
+                                    <c:if test="${loop.index < 5}">
+                                        <tr>
+                                            <td>${despesa.descricao}</td>
+                                            <td>R$ ${despesa.valor}</td>
+                                            <td>${despesa.dataDespesa}</td>
+                                            <td>${despesa.categoria.nome}</td>
+                                        </tr>
+                                    </c:if>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:if>
+                    <c:if test="${empty despesasRecentes}">
+                        <p>Nenhuma despesa cadastrada recentemente.</p>
+                    </c:if>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar">
+            <h2>Menu</h2>
+            <a href="<%= request.getContextPath() %>/categoria?action=form">Cadastrar Categoria</a>
+            <a href="<%= request.getContextPath() %>/despesas?action=form">Cadastrar Despesa</a>
+            <a href="<%= request.getContextPath() %>/categoria?action=listar">Listar Categorias</a>
+            <a href="<%= request.getContextPath() %>/despesas?action=listar">Listar Despesas</a>
+            <a href="<%= request.getContextPath() %>/logs?action=listar">Ver Logs</a>
+            <a href="<%= request.getContextPath() %>/logout">Sair</a>
+        </div>
+    </div>
+</body>
+</html>

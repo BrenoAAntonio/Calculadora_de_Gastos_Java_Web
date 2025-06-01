@@ -1,0 +1,52 @@
+package modelo;
+
+public class Configuracao {
+    private Integer id;
+    private Usuario usuario; // Configuração específica do usuário (pode ser nulo para configurações globais)
+    private String chave;
+    private String valor;
+
+    public Configuracao() {
+    }
+
+    public Configuracao(Integer id, Usuario usuario, String chave, String valor) {
+        this.id = id;
+        this.usuario = usuario;
+        this.chave = chave;
+        this.valor = valor;
+    }
+
+    // Getters e Setters
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public String getChave() {
+        return chave;
+    }
+
+    public void setChave(String chave) {
+        this.chave = chave;
+    }
+
+    public String getValor() {
+        return valor;
+    }
+
+    public void setValor(String valor) {
+        this.valor = valor;
+    }
+}

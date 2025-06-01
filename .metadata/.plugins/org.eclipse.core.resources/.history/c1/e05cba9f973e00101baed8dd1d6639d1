@@ -1,0 +1,60 @@
+package controller;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import dao.DespesaDAO;
+import modelo.Despesa;
+import modelo.Usuario;
+
+@WebServlet("/home")
+public class HomeController extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private DespesaDAO despesaDAO;
+
+    @Override
+    public void init() throws ServletException {
+        despesaDAO = new DespesaDAO();
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
+
+        if (usuarioLogado == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        try {
+            // Aqui você pode adicionar a lógica para buscar os dados para a home page
+            // como gastos do mês e despesas recentes. Por enquanto, vamos apenas encaminhar para a home.jsp.
+
+            // Exemplo de como buscar despesas recentes:
+            List<Despesa> despesasRecentes = despesaDAO.listarPorUsuario(usuarioLogado.getId());
+            request.setAttribute("despesasRecentes", despesasRecentes);
+
+            // TODO: Lógica para calcular os gastos do mês
+
+            request.getRequestDispatcher("home.jsp").forward(request, response);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("erro", "Erro ao carregar dados para a home page.");
+            request.getRequestDispatcher("home.jsp").forward(request, response);
+        }
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Geralmente a home não processa posts, mas você pode adicionar lógica se necessário.
+        doGet(request, response);
+    }
+}

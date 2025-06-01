@@ -1,0 +1,13 @@
+INDEX VERSION 1.134
+C:\Users\abren\OneDrive\Documentos\despesas\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1502224357.index
+\calculadora-gastos-web\src\main\java
+C:\Users\abren\OneDrive\Documentos\despesas\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\3768848838.index
+\calculadora-gastos-web\src\main\java
+C:\Users\abren\OneDrive\Documentos\despesas\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\750686018.index
+\calculadora-gastos-web\src\main\java
+C:\Users\abren\OneDrive\Documentos\despesas\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1780878621.index
+\calculadora-gastos-web\src\main\java
+C:\Users\abren\OneDrive\Documentos\despesas\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1585425676.index
+\calculadora-gastos-web\src\main\java
+C:\Users\abren\OneDrive\Documentos\despesas\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\2466358178.index
+\calculadora-gastos-web\src\main\java

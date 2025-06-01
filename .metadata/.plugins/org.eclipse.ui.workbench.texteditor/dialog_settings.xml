@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item key="hasShownOverlayPopupBefore" value="true"/>
+	<section name="java.lang.Class">
+		<item key="replaceBarOpen" value="false"/>
+		<list key="findhistory">
+			<item value="response.sendRedirect(&quot;despesasList.jsp?cadastroSucesso=true&quot;);"/>
+			<item value="request.getRequestDispatcher(&quot;DespesasForm.jsp&quot;).forward(request, response);"/>
+			<item value="request.getRequestDispatcher(&quot;CategoriaForm.jsp&quot;).forward(request, response);"/>
+			<item value="request.getRequestDispatcher(&quot;UsuarioForm.jsp&quot;).forward(request, response);"/>
+		</list>
+	</section>
+</section>

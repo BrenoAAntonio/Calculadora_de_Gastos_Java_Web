@@ -1,0 +1,59 @@
+package controller;
+
+import java.io.IOException;
+import java.sql.SQLException;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import dao.UsuarioDAO;
+import modelo.Usuario;
+
+@WebServlet("/usuario")
+public class UsuarioController extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private UsuarioDAO usuarioDAO;
+
+    @Override
+    public void init() throws ServletException {
+        usuarioDAO = new UsuarioDAO();
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+
+        if ("cadastrar".equals(action)) {
+            cadastrarUsuario(request, response);
+        }
+    }
+
+    private void cadastrarUsuario(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String login = request.getParameter("login");
+        String senha = request.getParameter("senha");
+        String nome = request.getParameter("nome");
+
+        Usuario usuario = new Usuario();
+        usuario.setLogin(login);
+        usuario.setSenha(senha);
+        usuario.setNome(nome);
+
+        try {
+            usuarioDAO.cadastrar(usuario);
+            response.sendRedirect("login.jsp?cadastroSucesso=true");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("erro", "Erro ao cadastrar usuário.");
+            request.getRequestDispatcher("Usuario/UsuarioForm.jsp").forward(request, response);
+        }
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if ("form".equals(action)) {
+            request.getRequestDispatcher("UsuarioForm.jsp").forward(request, response);
+        }
+    }
+}

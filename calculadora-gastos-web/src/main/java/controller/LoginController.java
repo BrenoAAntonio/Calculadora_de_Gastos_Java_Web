@@ -1,0 +1,50 @@
+package controller;
+
+import java.io.IOException;
+import java.sql.SQLException;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import dao.UsuarioDAO;
+import modelo.Usuario;
+
+@WebServlet("/login")
+public class LoginController extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private UsuarioDAO usuarioDAO;
+
+    @Override
+    public void init() throws ServletException {
+        usuarioDAO = new UsuarioDAO();
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String login = request.getParameter("login");
+        String senha = request.getParameter("senha");
+
+        try {
+            Usuario usuario = usuarioDAO.buscarPorLogin(login);
+            if (usuario != null && usuario.getSenha().equals(senha)) {
+                HttpSession session = request.getSession();
+                session.setAttribute("usuarioLogado", usuario);
+                response.sendRedirect(request.getContextPath() + "/home");
+            } else {
+                request.setAttribute("erro", "Login ou senha inválidos.");
+                request.getRequestDispatcher("Login/login.jsp").forward(request, response);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("erro", "Erro ao realizar o login.");
+            request.getRequestDispatcher("Login/login.jsp").forward(request, response);
+        }
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getRequestDispatcher("Login/login.jsp").forward(request, response);
+    }
+}

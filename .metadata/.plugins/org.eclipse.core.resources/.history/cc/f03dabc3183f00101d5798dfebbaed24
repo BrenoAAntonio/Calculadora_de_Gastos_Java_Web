@@ -1,0 +1,64 @@
+package modelo;
+
+import java.sql.Timestamp;
+
+public class Log {
+    private Integer id;
+    private Usuario usuario; // Referência ao usuário que realizou a ação (pode ser nulo)
+    private String acao;
+    private String detalhes;
+    private Timestamp dataLog;
+
+    public Log() {
+    }
+
+    public Log(Integer id, Usuario usuario, String acao, String detalhes, Timestamp dataLog) {
+        this.id = id;
+        this.usuario = usuario;
+        this.acao = acao;
+        this.detalhes = detalhes;
+        this.dataLog = dataLog;
+    }
+
+    // Getters e Setters
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public String getAcao() {
+        return acao;
+    }
+
+    public void setAcao(String acao) {
+        this.acao = acao;
+    }
+
+    public String getDetalhes() {
+        return detalhes;
+    }
+
+    public void setDetalhes(String detalhes) {
+        this.detalhes = detalhes;
+    }
+
+    public Timestamp getDataLog() {
+        return dataLog;
+    }
+
+    public void setDataLog(Timestamp dataLog) {
+        this.dataLog = dataLog;
+    }
+}

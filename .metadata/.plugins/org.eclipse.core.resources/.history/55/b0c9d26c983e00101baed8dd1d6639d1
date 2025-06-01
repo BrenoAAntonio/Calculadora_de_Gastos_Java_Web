@@ -1,0 +1,298 @@
+package dao;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import modelo.Categoria;
+import modelo.Despesa;
+import modelo.Usuario;
+
+public class DespesaDAO {
+
+    public void cadastrar(Despesa despesa) throws SQLException {
+        String sql = "INSERT INTO despesas (usuario_id, categoria_id, descricao, valor, data_despesa) VALUES (?, ?, ?, ?, ?)";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = Conexao.getConnection();
+            pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setInt(1, despesa.getUsuario().getId());
+            pstmt.setInt(2, despesa.getCategoria().getId());
+            pstmt.setString(3, despesa.getDescricao());
+            pstmt.setBigDecimal(4, despesa.getValor());
+            pstmt.setDate(5, despesa.getDataDespesa());
+            pstmt.executeUpdate();
+
+            ResultSet generatedKeys = pstmt.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                despesa.setId(generatedKeys.getInt(1));
+            }
+        } finally {
+            Conexao.closeConnection(conn);
+            if (pstmt != null) pstmt.close();
+        }
+    }
+
+    public Despesa buscarPorId(int id) throws SQLException {
+        String sql = "SELECT d.id, d.descricao, d.valor, d.data_despesa, d.data_cadastro, " +
+                     "u.id AS usuario_id, u.login, u.senha, u.nome AS usuario_nome, u.data_cadastro AS usuario_cadastro, " +
+                     "c.id AS categoria_id, c.nome AS categoria_nome, c.descricao AS categoria_descricao " +
+                     "FROM despesas d " +
+                     "INNER JOIN usuarios u ON d.usuario_id = u.id " +
+                     "INNER JOIN categorias c ON d.categoria_id = c.id " +
+                     "WHERE d.id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        Despesa despesa = null;
+
+        try {
+            conn = Conexao.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, id);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                despesa = new Despesa();
+                despesa.setId(rs.getInt("id"));
+                despesa.setDescricao(rs.getString("descricao"));
+                despesa.setValor(rs.getBigDecimal("valor"));
+                despesa.setDataDespesa(rs.getDate("data_despesa"));
+                despesa.setDataCadastro(rs.getTimestamp("data_cadastro"));
+
+                Usuario usuario = new Usuario();
+                usuario.setId(rs.getInt("usuario_id"));
+                usuario.setLogin(rs.getString("login"));
+                usuario.setSenha(rs.getString("senha"));
+                usuario.setNome(rs.getString("usuario_nome"));
+                usuario.setDataCadastro(rs.getTimestamp("usuario_cadastro"));
+                despesa.setUsuario(usuario);
+
+                Categoria categoria = new Categoria();
+                categoria.setId(rs.getInt("categoria_id"));
+                categoria.setNome(rs.getString("categoria_nome"));
+                categoria.setDescricao(rs.getString("categoria_descricao"));
+                despesa.setCategoria(categoria);
+            }
+        } finally {
+            Conexao.closeConnection(conn);
+            if (pstmt != null) pstmt.close();
+            if (rs != null) rs.close();
+        }
+        return despesa;
+    }
+
+    public void atualizar(Despesa despesa) throws SQLException {
+        String sql = "UPDATE despesas SET categoria_id = ?, descricao = ?, valor = ?, data_despesa = ? WHERE id = ? AND usuario_id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = Conexao.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, despesa.getCategoria().getId());
+            pstmt.setString(2, despesa.getDescricao());
+            pstmt.setBigDecimal(3, despesa.getValor());
+            pstmt.setDate(4, despesa.getDataDespesa());
+            pstmt.setInt(5, despesa.getId());
+            pstmt.setInt(6, despesa.getUsuario().getId());
+            pstmt.executeUpdate();
+        } finally {
+            Conexao.closeConnection(conn);
+            if (pstmt != null) pstmt.close();
+        }
+    }
+
+    public void excluir(int id, int usuarioId) throws SQLException {
+        String sql = "DELETE FROM despesas WHERE id = ? AND usuario_id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = Conexao.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, id);
+            pstmt.setInt(2, usuarioId);
+            pstmt.executeUpdate();
+        } finally {
+            Conexao.closeConnection(conn);
+            if (pstmt != null) pstmt.close();
+        }
+    }
+
+    public List<Despesa> listarPorUsuario(int usuarioId) throws SQLException {
+        String sql = "SELECT d.id, d.descricao, d.valor, d.data_despesa, d.data_cadastro, " +
+                     "c.id AS categoria_id, c.nome AS categoria_nome " +
+                     "FROM despesas d " +
+                     "INNER JOIN categorias c ON d.categoria_id = c.id " +
+                     "WHERE d.usuario_id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        List<Despesa> despesas = new ArrayList<>();
+
+        try {
+            conn = Conexao.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, usuarioId);
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Despesa despesa = new Despesa();
+                despesa.setId(rs.getInt("id"));
+                despesa.setDescricao(rs.getString("descricao"));
+                despesa.setValor(rs.getBigDecimal("valor"));
+                despesa.setDataDespesa(rs.getDate("data_despesa"));
+                despesa.setDataCadastro(rs.getTimestamp("data_cadastro"));
+
+                Categoria categoria = new Categoria();
+                categoria.setId(rs.getInt("categoria_id"));
+                categoria.setNome(rs.getString("categoria_nome"));
+                despesa.setCategoria(categoria);
+
+                Usuario usuario = new Usuario();
+                usuario.setId(usuarioId);
+                despesa.setUsuario(usuario);
+
+                despesas.add(despesa);
+            }
+        } finally {
+            Conexao.closeConnection(conn);
+            if (pstmt != null) pstmt.close();
+            if (rs != null) rs.close();
+        }
+        return despesas;
+    }
+
+    public boolean existeDespesaComCategoria(int categoriaId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM despesas WHERE categoria_id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        boolean existe = false;
+
+        try {
+            conn = Conexao.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, categoriaId);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                existe = rs.getInt(1) > 0;
+            }
+        } finally {
+            Conexao.closeConnection(conn);
+            if (pstmt != null) pstmt.close();
+            if (rs != null) rs.close();
+        }
+        return existe;
+    }
+
+    public BigDecimal getTotalGastoUltimos30Dias(int usuarioId) throws SQLException {
+        String sql = "SELECT SUM(valor) FROM despesas WHERE usuario_id = ? AND data_despesa >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        BigDecimal total = BigDecimal.ZERO;
+
+        try {
+            conn = Conexao.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, usuarioId);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                total = rs.getBigDecimal(1) != null ? rs.getBigDecimal(1) : BigDecimal.ZERO;
+            }
+        } finally {
+            Conexao.closeConnection(conn);
+            if (pstmt != null) pstmt.close();
+            if (rs != null) rs.close();
+        }
+        return total;
+    }
+
+    public List<Despesa> listarDespesasRecentes(int usuarioId, int limite) throws SQLException {
+        String sql = "SELECT d.id, d.descricao, d.valor, d.data_despesa, d.data_cadastro, " +
+                     "c.id AS categoria_id, c.nome AS categoria_nome " +
+                     "FROM despesas d " +
+                     "INNER JOIN categorias c ON d.categoria_id = c.id " +
+                     "WHERE d.usuario_id = ? ORDER BY d.data_cadastro DESC LIMIT ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        List<Despesa> despesas = new ArrayList<>();
+
+        try {
+            conn = Conexao.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, usuarioId);
+            pstmt.setInt(2, limite);
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Despesa despesa = new Despesa();
+                despesa.setId(rs.getInt("id"));
+                despesa.setDescricao(rs.getString("descricao"));
+                despesa.setValor(rs.getBigDecimal("valor"));
+                despesa.setDataDespesa(rs.getDate("data_despesa"));
+                despesa.setDataCadastro(rs.getTimestamp("data_cadastro"));
+
+                Categoria categoria = new Categoria();
+                categoria.setId(rs.getInt("categoria_id"));
+                categoria.setNome(rs.getString("categoria_nome"));
+                despesa.setCategoria(categoria);
+
+                Usuario usuario = new Usuario();
+                usuario.setId(usuarioId);
+                despesa.setUsuario(usuario);
+
+                despesas.add(despesa);
+            }
+        } finally {
+            Conexao.closeConnection(conn);
+            if (pstmt != null) pstmt.close();
+            if (rs != null) rs.close();
+        }
+        return despesas;
+    }
+
+    public Map<String, BigDecimal> getTotalGastoPorCategoria(int usuarioId) throws SQLException {
+        String sql = "SELECT c.nome, SUM(d.valor) AS total " +
+                     "FROM despesas d " +
+                     "INNER JOIN categorias c ON d.categoria_id = c.id " +
+                     "WHERE d.usuario_id = ? " +
+                     "GROUP BY c.nome";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        Map<String, BigDecimal> gastosPorCategoria = new HashMap<>();
+
+        try {
+            conn = Conexao.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, usuarioId);
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                String categoriaNome = rs.getString("nome");
+                BigDecimal totalGasto = rs.getBigDecimal("total") != null ? rs.getBigDecimal(1) : BigDecimal.ZERO;
+                gastosPorCategoria.put(categoriaNome, totalGasto);
+            }
+        } finally {
+            Conexao.closeConnection(conn);
+            if (pstmt != null) pstmt.close();
+            if (rs != null) rs.close();
+        }
+        return gastosPorCategoria;
+    }
+}

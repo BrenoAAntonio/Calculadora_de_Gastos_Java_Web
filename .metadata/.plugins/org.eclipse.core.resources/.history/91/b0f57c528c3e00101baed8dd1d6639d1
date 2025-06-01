@@ -1,0 +1,131 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<% if (session.getAttribute("usuarioLogado") == null) {
+    response.sendRedirect("../login.jsp");
+} %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Despesa</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 30px;
+            width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #ff9800;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #e68a00;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+
+        .back-link {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-container">
+        <h2>Cadastrar Despesa</h2>
+        <% if (request.getAttribute("erro") != null) { %>
+            <p class="error-message"><%= request.getAttribute("erro") %></p>
+        <% } %>
+        <form action="<%= request.getContextPath() %>/despesas?action=cadastrar" method="post">
+            <div class="form-group">
+                <label for="descricao">Descrição:</label>
+                <input type="text" id="descricao" name="descricao" required>
+            </div>
+            <div class="form-group">
+                <label for="valor">Valor:</label>
+                <input type="text" id="valor" name="valor" required>
+            </div>
+            <div class="form-group">
+                <label for="dataDespesa">Data da Despesa:</label>
+                <input type="date" id="dataDespesa" name="dataDespesa" required>
+            </div>
+            <div class="form-group">
+                <label for="categoriaId">Categoria:</label>
+                <select id="categoriaId" name="categoriaId" required>
+                    <option value="">Selecione a categoria</option>
+                    <c:forEach var="categoria" items="${categorias}">
+                        <option value="${categoria.id}">${categoria.nome}</option>
+                    </c:forEach>
+                </select>
+            </div>
+            <button type="submit">Salvar Despesa</button>
+        </form>
+        <div class="back-link">
+            <a href="<%= request.getContextPath() %>/home">Voltar para a Home</a>
+        </div>
+    </div>
+</body>
+</html>
