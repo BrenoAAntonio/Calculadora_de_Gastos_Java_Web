@@ -7,7 +7,7 @@ Aplicação Java Web para controle de despesas pessoais, com autenticação de u
 ## Tecnologias Utilizadas
 
 - Java (Servlets / JSP)
-- HTML5, CSS3 e JavaScript
+- HTML5, CSS3
 - MySQL
 - JDBC
 - MVC (Model-View-Controller)
